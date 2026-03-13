@@ -60,7 +60,7 @@ See [full setup guide](#%EF%B8%8F-setup) for details and [alternative model comb
 
   **Push Only** — group chat cards (experiment done, checkpoint, error, pipeline complete):
 
-  <img src="assets/feishu_push.jpg" width="700" />
+  <img src="assets/feishu_push.png" width="700" />
 
   **Interactive** — private chat with Claude Code (approve/reject, custom instructions):
 
@@ -515,7 +515,7 @@ Get mobile notifications when experiments finish, reviews score, or checkpoints 
 
 | Push Only (group cards) | Interactive (private chat) |
 |:-:|:-:|
-| <img src="assets/feishu_push.jpg" width="450" /> | <img src="assets/feishu_interactive.jpg" width="450" /> |
+| <img src="assets/feishu_push.png" width="450" /> | <img src="assets/feishu_interactive.jpg" width="450" /> |
 
 **Three modes — you choose per-project:**
 

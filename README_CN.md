@@ -60,7 +60,7 @@ claude
 
   **仅推送** — 群聊彩色卡片（实验完成、checkpoint、报错、流水线结束）：
 
-  <img src="assets/feishu_push.jpg" width="700" />
+  <img src="assets/feishu_push.png" width="700" />
 
   **双向交互** — 与 Claude Code 私聊（审批/拒绝、自定义指令）：
 
@@ -431,7 +431,7 @@ cp -r obsidian-skills/.claude /path/to/your/vault/
 
 | 仅推送（群聊卡片） | 双向交互（私聊） |
 |:-:|:-:|
-| <img src="assets/feishu_push.jpg" width="450" /> | <img src="assets/feishu_interactive.jpg" width="450" /> |
+| <img src="assets/feishu_push.png" width="450" /> | <img src="assets/feishu_interactive.jpg" width="450" /> |
 
 **三种模式，按需选择：**
 
