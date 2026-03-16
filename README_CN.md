@@ -940,6 +940,7 @@ claude
   - **方法示意图**（高难度）：架构图/流程图/pipeline 图 → VLM 理解 + 图像生成 → 迭代优化
   - 技术方案：[PaperBanana](https://github.com/dwzhu-pku/PaperBanana)（5 agent 框架：Retriever→Stylist→Visualizer→Critic，NeurIPS benchmark）、[Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/)（Gemini 图像模型）、[FigureLabs](https://www.figurelabs.ai/)（商业方案，PDF 导入）。ClawHub 上有 [OpenClaw 版本](https://clawhub.ai/skills/paperbanana)可参考，但需重写为 Claude Code skill（原版文件不完整 + 安全标记）
   - 最终增强 `/paper-figure` 支持 `— reference: paper.pdf` 风格匹配
+- [ ] **ModelScope 集成** — 支持 [ModelScope（魔搭社区）](https://www.modelscope.cn/) 作为执行器和/或审查器。ModelScope 托管国产开源模型（Qwen、GLM、Yi 等），提供 OpenAI 兼容 API。将作为方案 E 加入[替代模型组合](#-替代模型组合)，通过 `llm-chat` MCP 服务器接入
 
 ## 💬 交流群
 

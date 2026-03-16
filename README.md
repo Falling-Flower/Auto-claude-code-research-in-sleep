@@ -1042,6 +1042,7 @@ claude
   - **Method diagrams** (hard): architecture/pipeline/flowchart figures → VLM understanding + image generation → iterative refinement
   - Building blocks: [PaperBanana](https://github.com/dwzhu-pku/PaperBanana) (5-agent framework: Retriever→Stylist→Visualizer→Critic, NeurIPS benchmark), [Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/) (Gemini image model), [FigureLabs](https://www.figurelabs.ai/) (commercial, PDF import). An [OpenClaw version](https://clawhub.ai/skills/paperbanana) exists on ClawHub but needs rewrite for Claude Code (flagged as incomplete + security concerns)
   - Would enhance `/paper-figure` to accept `— reference: paper.pdf` for style matching
+- [ ] **ModelScope integration** — support [ModelScope](https://www.modelscope.cn/) as executor and/or reviewer provider. ModelScope hosts Chinese open-source models (Qwen, GLM, Yi, etc.) with OpenAI-compatible API endpoints. Would add as Alt E in [Alternative Model Combinations](#-alternative-model-combinations) via `llm-chat` MCP server
 
 ## 💬 Community
 
