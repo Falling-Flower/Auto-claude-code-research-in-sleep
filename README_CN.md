@@ -28,7 +28,7 @@
 
 ## 📢 最近更新
 
-- **2026-03-18** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 📊 **W&B 集成** — `/run-experiment` 在 CLAUDE.md 配 `wandb: true` 时自动加 `wandb.log()`。`/monitor-experiment` 从 W&B 拉训练曲线。🔗 **[工作流 1.5](skills/experiment-bridge/SKILL.md)** — 新增 `/experiment-bridge`：读实验计划 → 实现代码 → sanity check → 部署 → 收结果
+- **2026-03-18** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 📊 **W&B 集成** — `wandb: true` 时自动加 `wandb.log()`。🔗 **[工作流 1.5](skills/experiment-bridge/SKILL.md)** — `/experiment-bridge`：计划 → 实现 → 部署 → 收集。🎨 **[`paper-illustration`](skills/paper-illustration/SKILL.md)** — AI 生成架构图（Gemini），集成到工作流 3（`illustration: true`）。社区贡献 by [@Joseph-li343](https://github.com/Joseph-li343)
 - **2026-03-17** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔧 **Git 代码同步** — `/run-experiment` 支持 `code_sync: git`（`git push` → `ssh "git pull"`），替代 rsync。**[NARRATIVE_REPORT 示例](docs/NARRATIVE_REPORT_EXAMPLE.md)** 展示工作流 3 输入格式。**参数透传** — 任何层级加 `— key: value` 自动传到下游 skill（[详情](#%EF%B8%8F-自定义)）。🆓 **[ModelScope 指南](docs/MODELSCOPE_GUIDE.md)** — 免费（2000 次/天），一个 Key，无自动化限制（[方案 E](#-替代模型组合)）
 - **2026-03-16** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔬 **[`research-refine`](skills/research-refine/SKILL.md)** + [`experiment-plan`](skills/experiment-plan/SKILL.md) — 模糊 idea → 问题锚点明确的方案 + claim-driven 实验路线图。已集成到工作流 1（`/idea-discovery`）。社区贡献 by [@zjYao36](https://github.com/zjYao36)
 - **2026-03-16** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🇨🇳 **[阿里百炼 Coding Plan 接入指南](docs/ALI_CODING_PLAN_GUIDE.md)** — 一个 API Key、4 款模型（Kimi-K2.5 + Qwen3.5+ + GLM-5 + MiniMax-M2.5），双端点配置。社区贡献 by [@tianhao909](https://github.com/tianhao909)
@@ -79,6 +79,7 @@ claude
 > | `arxiv download` | `false` | 文献调研时下载最相关的 arXiv PDF。为 `false` 时仅获取元数据（标题、摘要、作者） |
 > | `DBLP_BIBTEX` | `true` | 从 [DBLP](https://dblp.org)/[CrossRef](https://www.crossref.org) 获取真实 BibTeX，替代 LLM 生成。杜绝幻觉引用。零安装 |
 > | `wandb` | `false` | 自动给实验脚本加 W&B 日志。设 `true` + 在 CLAUDE.md 配 `wandb_project`。`/monitor-experiment` 从 W&B 拉训练曲线 |
+> | `illustration` | `false` | 工作流 3 自动生成架构图/方法示意图（Gemini）。需 `GEMINI_API_KEY` 环境变量 |
 >
 > ```
 > /research-pipeline "你的课题" — AUTO_PROCEED: false                          # 在 idea 选择关卡暂停
@@ -413,6 +414,7 @@ NARRATIVE_REPORT.md ──► /paper-plan ──► /paper-figure ──► /pap
 | 📝 **[`paper-writing`](skills/paper-writing/SKILL.md)** | **流水线编排** — 按顺序调用以下全部 skill | 是 |
 | ├ 📐 [`paper-plan`](skills/paper-plan/SKILL.md) | Claims-evidence 矩阵、章节结构、图表计划、引用规划 | 是 |
 | ├ 📊 [`paper-figure`](skills/paper-figure/SKILL.md) | 出版级 matplotlib/seaborn 图表 + LaTeX 对比表 | 可选 |
+| ├ 🎨 [`paper-illustration`](skills/paper-illustration/SKILL.md) | AI 生成架构图/方法示意图（Gemini），`illustration: true` 时启用 | 否（需 Gemini API） |
 | ├ ✍️ [`paper-write`](skills/paper-write/SKILL.md) | 逐 section LaTeX 生成（ICLR/NeurIPS/ICML）。通过 DBLP/CrossRef 反幻觉 BibTeX | 是 |
 | ├ 🔨 [`paper-compile`](skills/paper-compile/SKILL.md) | 编译 LaTeX 为 PDF，自动修复错误，投稿就绪检查 | 否 |
 | └ 🔄 [`auto-paper-improvement-loop`](skills/auto-paper-improvement-loop/SKILL.md) | 2 轮内容审稿 + 格式检查（4/10 → 8.5/10） | 是 |
@@ -805,8 +807,9 @@ Skills 就是普通的 Markdown 文件，fork 后随意改：
 | `ARXIV_DOWNLOAD` | false | 搜索后自动下载最相关的 arXiv PDF | → `idea-discovery` → `research-lit` |
 | `HUMAN_CHECKPOINT` | false | 设为 `true` 时每轮 review 后暂停等待确认 | → `auto-review-loop` |
 | `WANDB` | false | 自动给实验脚本加 W&B 日志 | → `experiment-bridge` → `run-experiment` |
+| `ILLUSTRATION` | false | 自动生成方法架构图（Gemini）。需 `GEMINI_API_KEY` | → `paper-writing` → `paper-illustration` |
 
-行内覆盖：`/research-pipeline "方向" — auto proceed: false, human checkpoint: true, wandb: true`
+行内覆盖：`/research-pipeline "方向" — auto proceed: false, wandb: true, illustration: true`
 
 ### 自动 Review 循环（`auto-review-loop`）
 
@@ -860,8 +863,9 @@ Skills 就是普通的 Markdown 文件，fork 后随意改：
 | `TARGET_VENUE` | `ICLR` | 目标会议格式：`ICLR`、`NeurIPS`、`ICML` |
 | `ANONYMOUS` | true | 匿名审稿模式 |
 | `MAX_PAGES` | 9 | 正文页数上限（不含参考文献） |
+| `ILLUSTRATION` | false | 自动生成架构图/方法示意图（Gemini）。需 `GEMINI_API_KEY` |
 
-行内覆盖：`/paper-write — target venue: NeurIPS, max pages: 10, dblp bibtex: false`
+行内覆盖：`/paper-write — target venue: NeurIPS, illustration: true`
 
 ### 通用（所有使用 Codex MCP 的 skill）
 
@@ -984,7 +988,7 @@ claude
 - [ ] **常驻模式（Daemon mode）** — 通过 `launchd`/`systemd` 自动重启 Claude Code 会话，实现真正的无人值守运行。当前编排层需要活跃的 CLI 会话；状态文件（`REVIEW_STATE.json`、`AUTO_REVIEW.md`）支持跨会话恢复，但重启需手动操作（[#11](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/issues/11)）
 - [ ] **参考风格图表生成** — 读取参考论文 PDF 中的图表 → 识别图表类型、配色方案、布局风格 → 用自己的数据生成同风格图表。两个子目标：
   - **数据图表**（中等难度）：提取参考图配色/字体 → 转为 matplotlib rcParams → 用自己数据生成同风格 chart
-  - **方法示意图**（高难度）：架构图/流程图/pipeline 图 → VLM 理解 + 图像生成 → 迭代优化
+  - ~~**方法示意图**（高难度）~~：✅ 已由 [`paper-illustration`](skills/paper-illustration/SKILL.md) 解决 — Claude→Gemini→Nano Banana Pro 流水线，集成到工作流 3
   - 技术方案：[PaperBanana](https://github.com/dwzhu-pku/PaperBanana)（5 agent 框架：Retriever→Stylist→Visualizer→Critic，NeurIPS benchmark）、[Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/)（Gemini 图像模型）、[FigureLabs](https://www.figurelabs.ai/)（商业方案，PDF 导入）。ClawHub 上有 [OpenClaw 版本](https://clawhub.ai/skills/paperbanana)可参考，但需重写为 Claude Code skill（原版文件不完整 + 安全标记）
   - 最终增强 `/paper-figure` 支持 `— reference: paper.pdf` 风格匹配
 - [x] **ModelScope 集成** — [ModelScope 指南](docs/MODELSCOPE_GUIDE.md) 已加入为方案 E。免费（2000 次/天），一个 Key，双协议（Anthropic + OpenAI），无自动化限制。推荐 DeepSeek-V3.1 + DeepSeek-R1

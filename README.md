@@ -28,7 +28,7 @@ Custom [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills for 
 
 ## 📢 What's New
 
-- **2026-03-18** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 📊 **W&B integration** — `/run-experiment` auto-adds `wandb.log()` when `wandb: true` in CLAUDE.md. `/monitor-experiment` pulls training curves for richer diagnostics. 🔗 **[Workflow 1.5](skills/experiment-bridge/SKILL.md)** — new `/experiment-bridge` skill: read experiment plan → implement → sanity check → deploy → collect results
+- **2026-03-18** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 📊 **W&B integration** — auto `wandb.log()` when `wandb: true`. 🔗 **[Workflow 1.5](skills/experiment-bridge/SKILL.md)** — `/experiment-bridge`: plan → implement → deploy → collect. 🎨 **[`paper-illustration`](skills/paper-illustration/SKILL.md)** — AI-generated architecture diagrams via Gemini, integrated into Workflow 3 (`illustration: true`). Community contribution by [@Joseph-li343](https://github.com/Joseph-li343)
 - **2026-03-17** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔧 **Git code sync** — `/run-experiment` now supports `code_sync: git` (`git push` → `ssh "git pull"`) as alternative to rsync. **[NARRATIVE_REPORT example](docs/NARRATIVE_REPORT_EXAMPLE.md)** for Workflow 3. **Parameter pass-through** — set any downstream parameter at any level with `— key: value` ([details](#%EF%B8%8F-customization)). 🆓 **[ModelScope guide](docs/MODELSCOPE_GUIDE.md)** — free (2000 calls/day), one key, no automation restrictions ([Alt E](#-alternative-model-combinations))
 - **2026-03-16** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔬 **[`research-refine`](skills/research-refine/SKILL.md)** + [`experiment-plan`](skills/experiment-plan/SKILL.md) — turn vague ideas into problem-anchored proposals with claim-driven experiment roadmaps. Now integrated into Workflow 1 (`/idea-discovery`). Community contribution by [@zjYao36](https://github.com/zjYao36)
 - **2026-03-16** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🇨🇳 **[Alibaba Coding Plan guide](docs/ALI_CODING_PLAN_GUIDE.md)** — one API key, 4 models (Kimi-K2.5 + Qwen3.5+ + GLM-5 + MiniMax-M2.5), dual-endpoint setup. Community contribution by [@tianhao909](https://github.com/tianhao909)
@@ -79,6 +79,7 @@ claude
 > | `arxiv download` | `false` | Download top relevant arXiv PDFs during literature survey. When `false`, only fetches metadata (title, abstract, authors) |
 > | `DBLP_BIBTEX` | `true` | Fetch real BibTeX from [DBLP](https://dblp.org)/[CrossRef](https://www.crossref.org) instead of LLM-generated entries. Eliminates hallucinated citations. Zero install |
 > | `wandb` | `false` | Auto-add W&B logging to experiment scripts. Set `true` + configure `wandb_project` in CLAUDE.md. `/monitor-experiment` pulls training curves from W&B |
+> | `illustration` | `false` | Auto-generate architecture/method diagrams via Gemini in Workflow 3. Requires `GEMINI_API_KEY` env var |
 >
 > ```
 > /research-pipeline "your topic" — AUTO_PROCEED: false                          # pause at idea selection gate
@@ -382,7 +383,7 @@ Already have an experiment plan (from Workflow 1 or your own)? `/experiment-brid
 - ✂️ **De-AI polish** — removes AI writing patterns (delve, pivotal, landscape...)
 - 🎯 **Page verification** — `pdftotext`-based precise check that main body fits page limit
 
-> ⚠️ **What `/paper-figure` can and cannot do:** It auto-generates **data-driven plots** (training curves, bar charts, heatmaps) and **comparison tables** (LaTeX) from JSON/CSV data. It **cannot** generate architecture diagrams, pipeline figures, model diagrams, or grids of generated images — these must be created manually (e.g., draw.io, Figma, TikZ) and placed in `figures/` before running `/paper-write`. In a typical ML paper, ~60% of figures are auto-generated and ~40% are manual.
+> ⚠️ **Figure generation scope:** `/paper-figure` auto-generates **data-driven plots** (training curves, bar charts, heatmaps) and **comparison tables** from JSON/CSV. For **architecture diagrams and method figures**, set `illustration: true` to enable `/paper-illustration` (requires `GEMINI_API_KEY`) — it uses a Claude→Gemini→Nano Banana Pro pipeline to generate publication-quality diagrams automatically. Without `illustration: true`, architecture diagrams must be created manually (draw.io, Figma, TikZ).
 
 **Tested end-to-end:** Generated a 9-page ICLR 2026 theory paper (7 sections, 29 citations, 4 figures, 2 comparison tables) from a single NARRATIVE_REPORT.md — zero compilation errors, zero undefined references.
 
@@ -487,6 +488,7 @@ After Workflow 3 generates the paper, `/auto-paper-improvement-loop` runs 2 roun
 | 📝 **[`paper-writing`](skills/paper-writing/SKILL.md)** | **Pipeline orchestrator** — runs all skills below in sequence | Yes |
 | ├ 📐 [`paper-plan`](skills/paper-plan/SKILL.md) | Claims-evidence matrix, section structure, figure plan, citation scaffolding | Yes |
 | ├ 📊 [`paper-figure`](skills/paper-figure/SKILL.md) | Publication-quality matplotlib/seaborn plots + LaTeX comparison tables | Optional |
+| ├ 🎨 [`paper-illustration`](skills/paper-illustration/SKILL.md) | AI-generated architecture diagrams and method figures via Gemini (when `illustration: true`) | No (needs Gemini API) |
 | ├ ✍️ [`paper-write`](skills/paper-write/SKILL.md) | Section-by-section LaTeX generation (ICLR/NeurIPS/ICML). Anti-hallucination BibTeX via DBLP/CrossRef | Yes |
 | ├ 🔨 [`paper-compile`](skills/paper-compile/SKILL.md) | Compile LaTeX to PDF, auto-fix errors, submission readiness checks | No |
 | └ 🔄 [`auto-paper-improvement-loop`](skills/auto-paper-improvement-loop/SKILL.md) | 2-round content review + format check (4/10 → 8.5/10) | Yes |
@@ -908,8 +910,9 @@ Skills are plain Markdown files. Fork and customize:
 | `ARXIV_DOWNLOAD` | false | Download top arXiv PDFs after literature search | → `idea-discovery` → `research-lit` |
 | `HUMAN_CHECKPOINT` | false | When `true`, pause after each review round for approval | → `auto-review-loop` |
 | `WANDB` | false | Auto-add W&B logging to experiments | → `experiment-bridge` → `run-experiment` |
+| `ILLUSTRATION` | false | Auto-generate method diagrams via Gemini. Requires `GEMINI_API_KEY` | → `paper-writing` → `paper-illustration` |
 
-Override inline: `/research-pipeline "topic" — auto proceed: false, human checkpoint: true, wandb: true`
+Override inline: `/research-pipeline "topic" — auto proceed: false, wandb: true, illustration: true`
 
 ### Auto Review Loop (`auto-review-loop`)
 
@@ -963,8 +966,9 @@ Override inline: `/research-lit "topic" — sources: zotero, web`, `/research-li
 | `TARGET_VENUE` | `ICLR` | Target venue format: `ICLR`, `NeurIPS`, `ICML` |
 | `ANONYMOUS` | true | Use anonymous author block for blind review |
 | `MAX_PAGES` | 9 | Main body page limit (excluding references) |
+| `ILLUSTRATION` | false | Auto-generate architecture/method diagrams via Gemini. Requires `GEMINI_API_KEY` |
 
-Override inline: `/paper-write — target venue: NeurIPS, max pages: 10, dblp bibtex: false`
+Override inline: `/paper-write — target venue: NeurIPS, illustration: true`
 
 ### General (all skills using Codex MCP)
 
@@ -1086,7 +1090,7 @@ claude
 - [ ] **Daemon mode** — auto-restart Claude Code session via `launchd`/`systemd` for true unattended operation. Currently the orchestration layer requires an active CLI session; state files (`REVIEW_STATE.json`, `AUTO_REVIEW.md`) support resuming across sessions, but relaunch is manual ([#11](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/issues/11))
 - [ ] **Reference-style figure generation** — read figures from reference PDFs → identify chart type, color scheme, layout → generate same-style figures with your own data. Two sub-goals:
   - **Data charts** (medium): extract color/font style from reference → apply as matplotlib rcParams → generate same-style plots with your data
-  - **Method diagrams** (hard): architecture/pipeline/flowchart figures → VLM understanding + image generation → iterative refinement
+  - ~~**Method diagrams** (hard)~~: ✅ Solved by [`paper-illustration`](skills/paper-illustration/SKILL.md) — Claude→Gemini→Nano Banana Pro pipeline, integrated into Workflow 3
   - Building blocks: [PaperBanana](https://github.com/dwzhu-pku/PaperBanana) (5-agent framework: Retriever→Stylist→Visualizer→Critic, NeurIPS benchmark), [Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/) (Gemini image model), [FigureLabs](https://www.figurelabs.ai/) (commercial, PDF import). An [OpenClaw version](https://clawhub.ai/skills/paperbanana) exists on ClawHub but needs rewrite for Claude Code (flagged as incomplete + security concerns)
   - Would enhance `/paper-figure` to accept `— reference: paper.pdf` for style matching
 - [x] **ModelScope integration** — [ModelScope guide](docs/MODELSCOPE_GUIDE.md) added as Alt E. Free (2000 calls/day), one API key, dual-protocol (Anthropic + OpenAI), no automation restrictions. DeepSeek-V3.1 + DeepSeek-R1 recommended
