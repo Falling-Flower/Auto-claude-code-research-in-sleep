@@ -1199,6 +1199,7 @@ claude
   - ~~**Method diagrams** (hard)~~: ✅ Solved by [`paper-illustration`](skills/paper-illustration/SKILL.md) — Claude→Gemini→Nano Banana Pro pipeline, integrated into Workflow 3
   - Building blocks: [PaperBanana](https://github.com/dwzhu-pku/PaperBanana) (5-agent framework: Retriever→Stylist→Visualizer→Critic, NeurIPS benchmark), [Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/) (Gemini image model), [FigureLabs](https://www.figurelabs.ai/) (commercial, PDF import). An [OpenClaw version](https://clawhub.ai/skills/paperbanana) exists on ClawHub but needs rewrite for Claude Code (flagged as incomplete + security concerns)
   - Would enhance `/paper-figure` to accept `— reference: paper.pdf` for style matching
+- [ ] **Workflow execution report** — after each workflow (1/1.5/2/3) completes, auto-generate a structured summary: what was done, key decisions made, experiments run, results obtained, scores, and time spent. Output as `WORKFLOW_REPORT.md` for progress tracking, team reporting, and supervisor updates
 - [x] **ModelScope integration** — [ModelScope guide](docs/MODELSCOPE_GUIDE.md) added as Alt E. Free (2000 calls/day), one API key, dual-protocol (Anthropic + OpenAI), no automation restrictions. DeepSeek-V3.1 + DeepSeek-R1 recommended
 
 ## 💬 Community

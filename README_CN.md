@@ -1090,6 +1090,7 @@ claude
   - ~~**方法示意图**（高难度）~~：✅ 已由 [`paper-illustration`](skills/paper-illustration/SKILL.md) 解决 — Claude→Gemini→Nano Banana Pro 流水线，集成到工作流 3
   - 技术方案：[PaperBanana](https://github.com/dwzhu-pku/PaperBanana)（5 agent 框架：Retriever→Stylist→Visualizer→Critic，NeurIPS benchmark）、[Nano Banana Pro](https://deepmind.google/models/gemini-image/pro/)（Gemini 图像模型）、[FigureLabs](https://www.figurelabs.ai/)（商业方案，PDF 导入）。ClawHub 上有 [OpenClaw 版本](https://clawhub.ai/skills/paperbanana)可参考，但需重写为 Claude Code skill（原版文件不完整 + 安全标记）
   - 最终增强 `/paper-figure` 支持 `— reference: paper.pdf` 风格匹配
+- [ ] **工作流执行报告** — 每个工作流（1/1.5/2/3）完成后自动生成结构化总结：做了什么、关键决策、跑了哪些实验、获得什么结果、评分和耗时。输出为 `WORKFLOW_REPORT.md`，方便进度追踪、团队汇报和导师沟通
 - [x] **ModelScope 集成** — [ModelScope 指南](docs/MODELSCOPE_GUIDE.md) 已加入为方案 E。免费（2000 次/天），一个 Key，双协议（Anthropic + OpenAI），无自动化限制。推荐 DeepSeek-V3.1 + DeepSeek-R1
 
 ## 💬 交流群
