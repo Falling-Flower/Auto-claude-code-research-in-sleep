@@ -33,8 +33,17 @@ Important scope note:
 ## Why This Path
 
 - Codex CLI is a practical low-friction local executor for many users.
-- Gemini is often the easiest external reviewer to reach through API access, CLI access, or existing student plans.
+- Gemini is often one of the easiest external reviewers to reach: you can start with a normal Google account plus the Gemini API free tier in eligible regions, or use Gemini CLI / paid API access if needed.
 - Pairing the two keeps the executor/reviewer split while lowering both cost and setup friction for ARIS-style workflows.
+
+Access note:
+
+- Google AI Studio / Gemini API has a free tier in eligible countries; this does **not** require a Gemini Advanced / Google One AI Premium subscription.
+- Free-tier model availability and rate limits change over time, so do not treat any single quota number as permanent.
+- On the free tier, prompts and responses may be used to improve Google's products; do not position this path as suitable for sensitive data unless the user has reviewed the current paid-tier terms.
+- Official references:
+  - API key / AI Studio entry: <https://aistudio.google.com/apikey>
+  - Gemini API pricing and free tier: <https://ai.google.dev/gemini-api/docs/pricing>
 
 ## What This Adds
 
@@ -84,6 +93,7 @@ Alternative reviewer backend:
 1. **Gemini API**
    - set `GEMINI_API_KEY`
    - no Gemini CLI install required
+   - a paid Gemini consumer subscription is **not** required just to obtain an API key; check current AI Studio availability, rate limits, and pricing
 2. **Gemini CLI**
    - install `gemini` locally
    - authenticated CLI session or API-key-backed CLI config

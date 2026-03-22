@@ -34,8 +34,17 @@
 ## 为什么值得加这条路径
 
 - 对很多用户来说，Codex CLI 已经是足够低门槛的本地执行器。
-- Gemini 往往是最容易获取的外部审稿人接口之一，可以通过 API、CLI，或已有的学生计划来接入。
+- Gemini 往往也是最容易获取的外部审稿人接口之一：在支持地区，普通 Google 账号即可从 Gemini API / AI Studio 免费层起步；如果需要，也可以再走 Gemini CLI 或付费 API。
 - 把两者配对后，依然保留“执行者 / 审查者”分离的优点，同时显著降低 ARIS 工作流的使用成本和接入门槛。
+
+接入边界说明：
+
+- Google AI Studio / Gemini API 在支持地区提供免费层；这**不要求**你先订阅 Gemini Advanced / Google One AI Premium。
+- 免费层可用模型、速率限制和配额会随时间变化，不应把某个固定额度写成长期承诺。
+- 免费层下的 prompt / response 处理条款与付费层不同；如果涉及敏感数据，不能把这条路径按“免费且可直接上生产”来宣传，必须先核对当期官方条款。
+- 官方入口与定价说明：
+  - API key / AI Studio：<https://aistudio.google.com/apikey>
+  - Gemini API 定价与免费层：<https://ai.google.dev/gemini-api/docs/pricing>
 
 ## 新增了什么
 
@@ -85,6 +94,7 @@ reviewer 支持三种 profile：
 1. **Gemini API**
    - 设置 `GEMINI_API_KEY`
    - 不需要安装 Gemini CLI
+   - 不需要先购买 Gemini 面向消费者的订阅；但仍需自行核对 AI Studio 的当前可用地区、免费层和限速政策
 2. **Gemini CLI**
    - 本地安装 `gemini`
    - 已完成 CLI 登录，或 CLI 已配置 API key
