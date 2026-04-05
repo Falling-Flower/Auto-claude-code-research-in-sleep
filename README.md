@@ -110,6 +110,7 @@ Two outputs: `PASTE_READY.txt` (exact char count, paste to venue) + `REBUTTAL_DR
 
 ## 📢 What's New
 
+- **2026-04-05** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🧬 **[`/meta-optimize`](skills/meta-optimize/SKILL.md)** — outer-loop harness optimization for ARIS. Passively logs skill invocations, tool calls, failures, and parameter overrides via [Claude Code hooks](templates/claude-hooks/meta_logging.json). Run `/meta-optimize` to analyze accumulated usage data and propose SKILL.md improvements — reviewer-gated, user-approved. Inspired by [Meta-Harness](https://arxiv.org/abs/2603.28052) (Lee et al., 2026). **ARIS now optimizes itself.**
 - **2026-04-04** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔧 **Codex Plugin deep integration** — `/codex:rescue` now auto-invoked when experiments fail (Workflow 1.5) or LaTeX won't compile (Workflow 3). GPT independently diagnoses the bug before Claude retries — two AI debuggers are better than one. Optional: `codex exec` powers nightmare review, `/codex:rescue` powers auto-debug. [Setup →](#optional-codex-plugin-for-code-review)
 - **2026-04-03** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) ☁️ **[Modal serverless GPU](skills/serverless-modal/SKILL.md)** — no GPU? `gpu: modal` in CLAUDE.md, one command (`modal run launcher.py`), no SSH, no Docker, auto scale-to-zero. **$30/month free tier** — enough to try ARIS experiments without any hardware. `pip install modal && modal setup` and go. Community contribution by [@zeyuzhangzyz](https://github.com/zeyuzhangzyz)
 - **2026-04-03** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🎮 **Reviewer Difficulty Levels** — `medium` (default, unchanged), `hard` (reviewer memory + debate protocol), `nightmare` (GPT reads repo directly via `codex exec` — Claude can't hide anything). `— difficulty: nightmare` for maximum stress test before submission
@@ -165,7 +166,16 @@ claude
 > /paper-writing "NARRATIVE_REPORT.md"       # Workflow 3: narrative → polished PDF
 > /rebuttal "paper/ + reviews" — venue: ICML    # Workflow 4: parse reviews → draft rebuttal → follow-up
 > /research-pipeline "your research direction"  # Full pipeline: Workflow 1 → 1.5 → 2 → 3 end-to-end
+> /meta-optimize                                # Meta: analyze usage logs → propose skill improvements
 ```
+
+> 🧬 **Meta-optimization (optional):** Enable passive logging to let ARIS learn from your usage patterns:
+> ```bash
+> # Copy hook config into your project (one-time setup)
+> cp Auto-claude-code-research-in-sleep/templates/claude-hooks/meta_logging.json .claude/settings.json
+> # Or merge the "hooks" section into your existing .claude/settings.json
+> ```
+> After 5+ workflow runs, run `/meta-optimize` to see data-driven improvement proposals for your skills.
 
 > 📝 **Templates available!** See [`templates/`](templates/) for ready-to-use input templates for every workflow — [research brief](templates/RESEARCH_BRIEF_TEMPLATE.md) (Workflow 1), [experiment plan](templates/EXPERIMENT_PLAN_TEMPLATE.md) (Workflow 1.5), [narrative report](templates/NARRATIVE_REPORT_TEMPLATE.md) (Workflow 3), [paper plan](templates/PAPER_PLAN_TEMPLATE.md) (Workflow 3).
 >
@@ -332,6 +342,7 @@ These skills compose into a full research lifecycle. The four workflows can be u
 - **Ready to write the paper?** Workflow 3 → `/paper-writing` (or step by step: `/paper-plan` → `/paper-figure` → `/paper-write` → `/paper-compile` → `/auto-paper-improvement-loop`)
 - **Got reviews back? Need to rebuttal?** Workflow 4 → `/rebuttal` — parse reviews, draft safe rebuttal, follow-up rounds
 - **Full pipeline?** Workflow 1 → 1.5 → 2 → 3 → submit → 4 → `/research-pipeline` + `/rebuttal` — from idea to acceptance
+- **Want ARIS to improve itself?** Workflow M → `/meta-optimize` — analyze usage logs, propose skill improvements, reviewer-gated
 
 > ⚠️ **Important:** These tools accelerate research, but they don't replace your own critical thinking. Always review generated ideas with your domain expertise, question the assumptions, and make the final call yourself. The best research comes from human insight + AI execution, not full autopilot.
 
@@ -341,6 +352,9 @@ These skills compose into a full research lifecycle. The four workflows can be u
 /research-lit → /idea-creator → /novelty-check → /research-refine → /experiment-bridge → /auto-review-loop → /paper-writing → submit → /rebuttal → accept! 🎉
   (survey)      (brainstorm)    (verify novel)   (refine method)   (implement+deploy)  (review & fix)      (write paper)   (send)   (reply to reviewers)
   ├────────────── Workflow 1: Idea Discovery ──────────────┤ ├ Workflow 1.5 ─┤ ├── Workflow 2 ──┤ ├── Workflow 3 ──┤         ├── Workflow 4 ──┤
+
+                                              /meta-optimize (Workflow M — runs independently, improves ARIS itself)
+                                                 ↑ reads .aris/meta/events.jsonl (accumulated from all runs above)
 ```
 
 📝 **Blog post:** [梦中科研全流程开源](http://xhslink.com/o/2iV33fYoc7Q)
