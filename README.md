@@ -127,6 +127,7 @@ Two outputs: `PASTE_READY.txt` (exact char count, paste to venue) + `REBUTTAL_DR
 
 ## 📢 What's New
 
+- **2026-04-21** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🛡️ **Assurance Gate: `— effort: beast | max` now really runs the mandatory audits** ([`assurance-contract.md`](skills/shared-references/assurance-contract.md), [`tools/verify_paper_audits.sh`](tools/verify_paper_audits.sh)) — fixes a user-reported bug where `— effort: beast` silently skipped `/proof-checker` / `/paper-claim-audit` / `/citation-audit` because each phase's content detector could fail open. New **`assurance`** axis (`draft` | `submission`) is independent from `effort`; `lite` / `balanced` (default) → `draft` with **zero behavior change**, `max` / `beast` → `submission`. At `submission` the three audits **always emit** a JSON artifact with 6-state verdict (`PASS`/`WARN`/`FAIL`/`NOT_APPLICABLE`/`BLOCKED`/`ERROR`), and `paper-writing` Phase 6 runs `tools/verify_paper_audits.sh` as the **external source of truth** — non-zero exit blocks the Final Report, not the model's self-report. SHA256 input hashing catches stale audits (paper edited after audit ran). Three rounds of cross-model review (GPT-5.4 xhigh) before shipping. Escape hatch: `— effort: beast, assurance: draft` keeps the old depth-only behavior. Optional Stop hook documented for teams that want harness-level enforcement. Empirical motivation: a real April 2026 run surfaced that `— effort: beast` produced a draft-quality paper with all three submission-gate audits skipped
 - **2026-04-20** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🩹 **Project install: flat layout + manifest tracking** — fixes a real bug where the previous nested install (`.claude/skills/aris/`) hid skills from Claude Code's slash-command discovery (CC only scans one directory level). Anyone who ran `install_aris.sh` before this date was silently affected. New `install_aris.sh` creates one symlink per skill at `.claude/skills/<name>`, writes a versioned manifest to `.aris/installed-skills.txt`, and is **re-runnable to reconcile** new/removed upstream skills. Defense-in-depth: 13 safety rules (no-symlinked-parents, exact-target revalidation, slug regex, atomic same-dir manifest rename, no-overwrite-real-files, mkdir-based portable lock, ADOPT for crash recovery, …). Granular `--adopt-existing` / `--replace-link` flags replace the all-or-nothing `--force`. Migration paths: `--from-old` for legacy nested symlink, `--migrate-copy keep-user|prefer-upstream` for legacy nested copy. `smart_update.sh --target-subdir .claude/skills/aris` is now deprecated with a redirect to `install_aris.sh`. Stale-file bug in `cp -r` overlay also fixed (now `rm -rf && cp -r` for safe-update path)
 - **2026-04-19** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 🔗 **[`/overleaf-sync`](skills/overleaf-sync/SKILL.md)** — two-way bridge between local ARIS paper directory and an Overleaf project via the official **Overleaf Git bridge** (Premium). Lets collaborators keep editing in the Overleaf web UI while ARIS audit/edit pipelines (`/paper-claim-audit`, `/citation-audit`, `/auto-paper-improvement-loop`) keep running locally. Sub-commands: `setup` (one-time, user-driven so the agent never sees the token) / `pull` (with diff-protocol — flags half-sentences, typos, claim/cite changes that should re-trigger audits) / `push` (with confirmation gate before writing to shared Overleaf state) / `status` (3-way divergence check). **Token never touches the agent or any file** — primed once into macOS Keychain via the user's terminal, then auth-free for all subsequent agent operations
 - **2026-04-19** — ![NEW](https://img.shields.io/badge/NEW-red?style=flat-square) 📚 **[`/citation-audit`](skills/citation-audit/SKILL.md)** — fourth and final layer of the evidence-and-claim assurance stack (`experiment-audit` → `result-to-claim` → `paper-claim-audit` → `citation-audit`). Fresh cross-family reviewer (gpt-5.4 via Codex MCP) with web/DBLP/arXiv lookup verifies every `\cite{...}` along three independent axes: **existence** (paper resolves at claimed arXiv ID/DOI/venue), **metadata correctness** (authors/year/venue/title match canonical sources), and **context appropriateness** (the cited paper actually establishes the claim it supports — the most diagnostic check). Per-entry verdicts: KEEP / FIX / REPLACE / REMOVE. Auto-integrated into **Workflow 3 Phase 5.8** as the pre-submission bibliography gate. Empirical motivation: in our April 2026 ARIS tech-report run, two real papers (`madaan2023selfrefine`, `liu2023reviewergpt`) were cited in contexts they did not actually support, and one entry had `author = "Anonymous"` — none caught by metadata-only checks
@@ -689,7 +690,7 @@ Already have an experiment plan (from Workflow 1 or your own)? `/experiment-brid
 
 **Input:** A `NARRATIVE_REPORT.md` describing the research: claims, experiments, results, figures. The more detailed the narrative (especially figure descriptions and quantitative results), the better the output. See [`templates/NARRATIVE_REPORT_TEMPLATE.md`](templates/NARRATIVE_REPORT_TEMPLATE.md) for a complete example.
 
-**Output:** A submission-ready `paper/` directory with LaTeX source, clean `.bib` (only cited entries), and compiled PDF.
+**Output:** A `paper/` directory with LaTeX source, clean `.bib` (only cited entries), and compiled PDF. The PDF is labelled `submission-ready` **only when** run at `— effort: max | beast` (or explicit `— assurance: submission`) **and** `tools/verify_paper_audits.sh` reports green on the three mandatory audits (`proof-checker`, `paper-claim-audit`, `citation-audit`); see [Assurance Gate](#assurance-gate-effort-max--beast) below. At the default `balanced` level, the output is a reviewed draft.
 
 **Key features:**
 - 📐 **Claims-Evidence Matrix** — every claim maps to evidence, every experiment supports a claim
@@ -708,7 +709,7 @@ Already have an experiment plan (from Workflow 1 or your own)? `/experiment-brid
 
 #### Auto Paper Improvement Loop ✨
 
-After Workflow 3 generates the paper, `/auto-paper-improvement-loop` runs 2 rounds of GPT-5.4 xhigh content review → fix → recompile, plus a final format compliance check, autonomously polishing the paper from rough draft to submission-ready.
+After Workflow 3 generates the paper, `/auto-paper-improvement-loop` runs 2 rounds of GPT-5.4 xhigh content review → fix → recompile, plus a final format compliance check, autonomously polishing the paper from rough draft to a reviewer-scored draft. Whether the result is tagged `submission-ready` is decided separately by the Phase 6 assurance gate (see [Assurance Gate](#assurance-gate-effort-max--beast)).
 
 **Score Progression (Real Test — ICLR 2026 theory paper):**
 
@@ -1004,6 +1005,54 @@ claude   # hooks active immediately
 </details>
 
 > 📖 Full specification: [`shared-references/effort-contract.md`](skills/shared-references/effort-contract.md)
+
+### Assurance Gate (effort: max | beast)
+
+ARIS has two independent axes: **`effort`** controls how much work is done
+(breadth/depth), **`assurance`** controls whether mandatory audits are
+load-bearing. Default mapping:
+
+| `effort` | Implied `assurance` | Paper-writing Phase 6 behavior |
+|----------|---------------------|--------------------------------|
+| `lite` / `balanced` (**default**) | `draft` | **Current behavior, zero change.** Audits run only if their content detector matches; missing artifacts are non-blocking. |
+| `max` / `beast` | `submission` | Phase 6 force-invokes `/proof-checker`, `/paper-claim-audit`, `/citation-audit` in fresh threads, runs `tools/verify_paper_audits.sh`, and **refuses to emit the Final Report** if the verifier returns non-zero (missing / stale / FAIL / BLOCKED / ERROR). |
+
+**What this fixes:** previously, `— effort: beast` did not actually
+guarantee the three mandatory audits ran — the content detectors could
+silent-skip, so beast-mode papers could ship without proof verification or
+citation checks. The assurance axis makes audit enforcement externally
+verifiable via `tools/verify_paper_audits.sh` (the verifier's exit code is
+the source of truth, not the executor's self-report).
+
+**Backwards compatibility:** users on the default `balanced` level see
+zero change. Only users who opt up to `max` / `beast`, or who explicitly
+pass `— assurance: submission`, see the new gate.
+
+**Escape hatch:** `— effort: beast, assurance: draft` gets the old
+"depth-only, no audit gate" behavior back. Legal but discouraged for
+actual submissions.
+
+**Optional harness hardening (advanced):** teams who want the model to
+be *physically* prevented from ending a session while the verifier is red
+can register a Stop hook in `~/.claude/settings.json` (replace
+`<ARIS_REPO>` with the absolute path to your ARIS clone, e.g.
+`/Users/you/Auto-claude-code-research-in-sleep`):
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {"command": "bash <ARIS_REPO>/tools/verify_paper_audits.sh paper/ --assurance submission"}
+    ]
+  }
+}
+```
+
+This is not required — the default repo behavior (Phase 6 verifier-as-truth)
+already blocks Final Report emission on a red verdict. The Stop hook is a
+belt-and-suspenders layer for teams that want harness-level enforcement.
+
+> 📖 Full specification: [`shared-references/assurance-contract.md`](skills/shared-references/assurance-contract.md)
 
 ### 🧿 Optional: GPT-5.4 Pro via Oracle
 
